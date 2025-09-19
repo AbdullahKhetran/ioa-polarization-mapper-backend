@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Environment variables
+.env
+
+# Byte-compiled / optimized / DLL files
+*.so
+*.egg
+*.egg-info/
+*.manifest
+*.spec
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Logs
+*.log
+*.sqlite3
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Pip cache
+pip-log.txt
+pip-delete-this-directory.txt
+
+# MyPy
+.mypy_cache/
+
+# Coverage
+.coverage
+htmlcov/
+.tox/
+
+# Temporary files
+*.tmp
+
+# User added
+notes.txt
