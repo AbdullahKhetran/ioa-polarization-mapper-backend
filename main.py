@@ -1,11 +1,14 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Dict, Any
 from app.agent_logic import analyze_topic
+import os
 
 
 app = FastAPI()
+
+BACKEND_API_KEY = os.getenv("BACKEND_API_KEY")
 
 # CORS setup
 origins = [
@@ -27,5 +30,8 @@ class TopicRequest(BaseModel):
 
 
 @app.post("/analyze")
-def analyze(request: TopicRequest) -> Dict[str, Any]:
+def analyze(request: TopicRequest, auth: str = Header(...)) -> Dict[str, Any]:
+    if auth != BACKEND_API_KEY:
+        raise HTTPException(status_code=403, detail="Unauthorized")
+
     return analyze_topic(request.topic)
