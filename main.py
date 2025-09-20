@@ -30,7 +30,7 @@ class TopicRequest(BaseModel):
 
 
 @app.post("/analyze")
-def analyze(request: TopicRequest, auth: str = Header(...)) -> Dict[str, Any]:
+def analyze(request: TopicRequest, auth: str = Header(None)) -> Dict[str, Any]:
     if auth != BACKEND_API_KEY:
         raise HTTPException(status_code=403, detail="Unauthorized")
 
