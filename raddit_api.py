@@ -1,10 +1,16 @@
 import praw
+import os
+from dotenv import load_dotenv
 
-# 🔑 App credentials (use env vars later for security!)
+load_dotenv()
+REDDIT_CLIENT_ID = os.getenv("REDDIT_CLIENT_ID")
+REDDIT_CLIENT_SECRET = os.getenv("REDDIT_CLIENT_SECRET")
+REDDIT_USER_AGENT = os.getenv("REDDIT_USER_AGENT")
+
 reddit = praw.Reddit(
-    client_id="your_id",
-    client_secret="you_key",
-    user_agent="name_agent"
+    client_id=REDDIT_CLIENT_ID,
+    client_secret=REDDIT_CLIENT_SECRET,
+    user_agent=REDDIT_USER_AGENT
 )
 
 query = "climate change"
