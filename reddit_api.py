@@ -13,27 +13,23 @@ reddit = praw.Reddit(
     user_agent=REDDIT_USER_AGENT
 )
 
-query = "climate change"
 
-print(f"\n🔎 Searching for: {query}\n")
+def fetch_posts(topic, limit=10):
 
-for idx, submission in enumerate(
-    reddit.subreddit("all").search(query, limit=10, sort="relevance"), start=1
-):
-    print(f"📌 Post {idx}")
-    print(f"Title      : {submission.title}")
-    print(f"Score      : {submission.score}")
-    print(f"URL        : {submission.url}")
-    print(f"Permalink  : https://www.reddit.com{submission.permalink}")
-    print(f"Description: {submission.selftext[:500] or '[No description]'}")
-    print("\n💬 Top 10 Comments:")
+    results = []
 
-    # Load comments (replace MoreComments with actual comments)
-    submission.comments.replace_more(limit=0)
-    comments = submission.comments.list()
+    for submission in reddit.subreddit("all").search(topic, limit=limit, sort="relevance"):
+        submission.comments.replace_more(limit=0)  # flatten "MoreComments"
+        comments = [c.body.replace("\n", " ")
+                    for c in submission.comments[:10]]
 
-    for i, comment in enumerate(comments[:10], start=1):
-        text = comment.body.replace("\n", " ")
-        print(f"  {i}. {text[:200]}")  # truncate long comments for readability
+        results.append({
+            "title": submission.title,
+            "score": submission.score,
+            "url": submission.url,
+            "permalink": f"https://www.reddit.com{submission.permalink}",
+            "description": submission.selftext[:500] or "[No description]",
+            "comments": comments
+        })
 
-    print("\n" + "=" * 120 + "\n")
+    return results
