@@ -77,7 +77,6 @@ def call_ai_service(prompt):
     }
 
     response = requests.post(url, headers=headers, json=body)
-    # print("data from ai model", response.json())
     return response.json()
 
 

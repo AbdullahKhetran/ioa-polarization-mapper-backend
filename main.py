@@ -56,10 +56,8 @@ def verify_jwt(token):
 # todo, add authorization here
 @app.post("/fetch-posts")
 def fetch_posts_by_ids(request: PostRequest, authorization: str = Header(None)):
-    print("fetch posts route hit")
 
     if not authorization:
-        print("if not auth hit")
         raise HTTPException(
             status_code=401, detail="Missing Authorization header")
 
@@ -75,14 +73,12 @@ def fetch_posts_by_ids(request: PostRequest, authorization: str = Header(None)):
     verify_jwt(token)
 
     if not request.ids:
-        print("requests.id is not here, returning empty list")
         return {"posts": []}
 
     posts = fetch_posts(request.topic)  # re-fetch posts for topic
     post_dict = {p["id"]: p for p in posts}
     selected = [post_dict[i] for i in request.ids if i in post_dict]
 
-    print("returning selected posts", selected)
     return {"posts": selected}
 
 
