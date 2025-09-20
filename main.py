@@ -55,7 +55,22 @@ def verify_jwt(token):
 
 # todo, add authorization here
 @app.post("/fetch-posts")
-def fetch_posts_by_ids(request: PostRequest):
+def fetch_posts_by_ids(request: PostRequest, authorization: str = Header(None)):
+    if not authorization:
+        raise HTTPException(
+            status_code=401, detail="Missing Authorization header")
+
+    try:
+        token_type, token = authorization.split()
+        if token_type.lower() != "bearer":
+            raise HTTPException(status_code=401, detail="Invalid token type")
+    except ValueError:
+        raise HTTPException(
+            status_code=401, detail="Invalid Authorization header format")
+
+    # Verify JWT
+    verify_jwt(token)
+
     if not request.ids:
         return {"posts": []}
 
