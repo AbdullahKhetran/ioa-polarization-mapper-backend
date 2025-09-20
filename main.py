@@ -1,4 +1,3 @@
-from dotenv import load_dotenv
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -6,15 +5,14 @@ from typing import Dict, Any
 from app.agent_logic import analyze_topic
 import os
 import jwt
-
-
-app = FastAPI()
+# from dotenv import load_dotenv # for localhost
 
 # # for localhost
 # load_dotenv()
 # JWT_SECRET = os.getenv("JWT_SECRET")
 # AIML_API_KEY = os.getenv("AIML_API_KEY")
 
+app = FastAPI()
 
 # CORS setup
 origins = [
