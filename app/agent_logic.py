@@ -32,7 +32,7 @@ def build_prompt(topic: str, posts) -> str:
     """
     # Add each post dynamically
     for post in posts:
-        prompt += f"  - \"{post}\"\n"
+        prompt += f'  - (id={post["id"]}) "{post["title"]}"\n'
 
     # Add instructions for AI to respond in JSON
     prompt += """
@@ -40,12 +40,14 @@ def build_prompt(topic: str, posts) -> str:
     1. Pick the most appropriate method for these posts.
     2. Explain in 1-2 sentences why you picked this method.
     3. Calculate the polarization score based on the selected method.
-    4. Output strictly in the following JSON format:
+    4. Include up to 3 example post IDs that influenced your decision.
+    5. Output strictly in the following JSON format:
 
     {
     "selected_method": "<method_name>",
     "reason": "<short_reason_for_method_choice>",
-    "polarization_score": <score_between_0_and_1>
+    "polarization_score": <score_between_0_and_1>,
+    "example_post_ids": ["<id1>", "<id2>", "<id3>"]
     }
 
     Important:
@@ -87,6 +89,7 @@ def extract_ai_result(full_response):
     - selected_method
     - reason
     - polarization_score
+    - example posts id
     """
     try:
         # Navigate to the content string in the response
@@ -97,14 +100,16 @@ def extract_ai_result(full_response):
         result = {
             "selected_method": parsed.get("selected_method", "unknown"),
             "reason": parsed.get("reason", ""),
-            "polarization_score": parsed.get("polarization_score", 0.0)
+            "polarization_score": parsed.get("polarization_score", 0.0),
+            "example_post_ids": parsed.get("example_post_ids", [])
         }
     except (KeyError, IndexError, json.JSONDecodeError):
         # Fallback if response format is unexpected
         result = {
             "selected_method": "unknown",
             "reason": "Could not parse AI response",
-            "polarization_score": 0.0
+            "polarization_score": 0.0,
+            "example_post_ids": []
         }
 
     return result
@@ -112,13 +117,18 @@ def extract_ai_result(full_response):
 
 def analyze_topic(topic: str):
 
-    # Step 1: Get Reddit data
     reddit_data = fetch_posts(topic)
 
     if not reddit_data:
-        return {"topic": topic, "polarization_score": 0.0, "clusters": []}
+        return {"topic": topic, "polarization_score": 0.0}
 
-    prompt = build_prompt(topic, reddit_data)
+    selected_reddit_data = []  # send only id and titles of post
+    for post in reddit_data:
+        id = post.get("id")
+        title = post.get("title", "[No title]")
+        selected_reddit_data.append({"id": id, "title": title})
+
+    prompt = build_prompt(topic, selected_reddit_data)
 
     ai_response = call_ai_service(prompt)  # ai full response
 

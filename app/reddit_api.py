@@ -24,6 +24,7 @@ def fetch_posts(topic, limit=10):
                     for c in submission.comments[:10]]
 
         results.append({
+            "id": submission.id,
             "title": submission.title,
             "score": submission.score,
             "url": submission.url,

@@ -1,11 +1,13 @@
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Dict, Any
+from typing import Dict, Any, List
 from app.agent_logic import analyze_topic
+from app.reddit_api import fetch_posts
 import os
 import jwt
-# from dotenv import load_dotenv # for localhost
+# from dotenv import load_dotenv
+
 
 # # for localhost
 # load_dotenv()
@@ -32,6 +34,11 @@ class TopicRequest(BaseModel):
     topic: str
 
 
+class PostRequest(BaseModel):
+    ids: List[str]
+    topic: str
+
+
 JWT_SECRET = os.getenv("JWT_SECRET")
 JWT_ALGORITHM = "HS256"
 
@@ -44,6 +51,19 @@ def verify_jwt(token):
         raise HTTPException(status_code=401, detail="Token expired")
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=403, detail="Invalid token")
+
+
+# todo, add authorization here
+@app.post("/fetch-posts")
+def fetch_posts_by_ids(request: PostRequest):
+    if not request.ids:
+        return {"posts": []}
+
+    posts = fetch_posts(request.topic)  # re-fetch posts for topic
+    post_dict = {p["id"]: p for p in posts}
+    selected = [post_dict[i] for i in request.ids if i in post_dict]
+
+    return {"posts": selected}
 
 
 @app.post("/analyze")
