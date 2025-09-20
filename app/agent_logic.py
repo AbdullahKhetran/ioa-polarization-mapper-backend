@@ -1,6 +1,6 @@
 import os
 import requests
-from app.reddit_client import fetch_posts
+from app.reddit_api import fetch_posts
 from dotenv import load_dotenv
 import json
 
