@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from typing import Dict, Any
 from app.agent_logic import analyze_topic
 import os
+import jwt
 
 
 app = FastAPI()
@@ -29,9 +30,35 @@ class TopicRequest(BaseModel):
     topic: str
 
 
+JWT_SECRET = os.getenv("JWT_SECRET")
+JWT_ALGORITHM = "HS256"
+
+
+def verify_jwt(token):
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=403, detail="Invalid token")
+
+
 @app.post("/analyze")
 def analyze(request: TopicRequest, auth: str = Header(None)) -> Dict[str, Any]:
-    if auth != BACKEND_API_KEY:
-        raise HTTPException(status_code=403, detail="Unauthorized")
+    if not auth:
+        raise HTTPException(
+            status_code=401, detail="Missing Authorization header")
+
+    try:
+        token_type, token = auth.split()
+        if token_type.lower() != "bearer":
+            raise HTTPException(status_code=401, detail="Invalid token type")
+    except ValueError:
+        raise HTTPException(
+            status_code=401, detail="Invalid Authorization header format")
+
+    # Verify JWT
+    verify_jwt(token)
 
     return analyze_topic(request.topic)
